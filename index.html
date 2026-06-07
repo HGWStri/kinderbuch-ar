@@ -7,28 +7,27 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <script>
-      // Diese Komponente zwingt A-Frame, das Video JEDEN Frame neu zu zeichnen
       AFRAME.registerComponent('video-controls', {
         init: function () {
-          this.toggle = false;
           this.vid = document.querySelector("#buchVideo");
           
-          // Sobald das Logo gefunden wird
           this.el.addEventListener('targetFound', () => {
             console.log("Target gefunden - Video wird gestartet");
             this.vid.play();
           });
 
-          // Wenn das Logo aus dem Bild verschwindet
           this.el.addEventListener('targetLost', () => {
             console.log("Target verloren - Video pausiert");
             this.vid.pause();
           });
         },
-        // Das hier ist der Schlüssel: Es aktualisiert die Textur im Sekundentakt!
+        // HIER IST DIE RETTUNG: Wir prüfen erst, ob das 'mesh' existiert!
         tick: function () {
           if (!this.vid.paused) {
-            this.el.getObject3D('mesh').material.map.needsUpdate = true;
+            const mesh = this.el.getObject3D('mesh');
+            if (mesh && mesh.material && mesh.material.map) {
+              mesh.material.map.needsUpdate = true;
+            }
           }
         }
       });
@@ -55,8 +54,8 @@
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity id="my-target" mindar-image-target="targetIndex: 0" video-controls>
-          <a-video src="#buchVideo" width="1" height="0.55" position="0 0 0"></a-video>
+        <a-entity id="my-target" mindar-image-target="targetIndex: 0">
+          <a-video id="my-video-mesh" src="#buchVideo" width="1" height="0.55" position="0 0 0" video-controls></a-video>
         </a-entity>
       </a-scene>
     </div>
